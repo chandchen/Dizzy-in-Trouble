@@ -3,6 +3,7 @@ import pygame
 
 from settings import Settings
 
+
 def run_game():
     pygame.init()
     DTsettings = Settings()
@@ -10,23 +11,48 @@ def run_game():
         (DTsettings.screen_width, DTsettings.screen_height))
     pygame.display.set_caption('Dizzy in Trouble')
     background = pygame.image.load('images/background.jpg')
+    background = pygame.transform.scale(background, (1000, 555))
 
-    frame1 = pygame.image.load("images/2611/01.gif")
-    frame2 = pygame.image.load("images/2611/02.gif")
-    frame3 = pygame.image.load("images/2611/03.gif")
-    frames = [frame1, frame2, frame3]
-    n = 0
+    font = pygame.font.SysFont("arial", 16)
+    text = font.render('Cliked Me please!!!', True, (34, 252, 43))
+    mouse_x, mouse_y = 0, 0
+
+    music_file = "musics/adenium.mp3"
+    freq = 44100
+    bitsize = -16
+    channels = 2
+    buffer = 2048
+    pygame.mixer.init(freq, bitsize, channels, buffer)
+    pygame.mixer.music.set_volume(0.8)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-        n = n + 1
-        if n > (len(frames)) * 10 - 1:
-            n = 0
-            screen.blit(frames[int(n / 10)], [0, 0])
         screen.blit(background, (0, 0))
-        pill = pygame.image.load('images/2611/01.gif')
-        screen.blit(pill, (0, 0))
+        screen.fill((mouse_x, mouse_y, 0))
+        screen.blit(text, (40, 100))
         pygame.display.flip()
+
+        try:
+            play_music(music_file)
+        except KeyboardInterrupt:
+            pygame.mixer.music.fadeout(1000)
+            pygame.mixer.music.stop()
+            raise SystemExit
+
+
+def play_music(music_file):
+    clock = pygame.time.Clock()
+    try:
+        pygame.mixer.music.load(music_file)
+        print("Music file {} loaded!".format(music_file))
+    except pygame.error:
+        print("File {} not found! {}".format(music_file, pygame.get_error()))
+        return
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        clock.tick(30)
+
+
 run_game()
